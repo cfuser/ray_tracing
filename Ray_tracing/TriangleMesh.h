@@ -30,10 +30,10 @@ struct TriangleMesh
 	Material* material;
 	int MtlNameIndex;
 	int index;
-	Eigen::Vector3d Kd;
-	Eigen::Vector3d Ks;
-	Eigen::Vector3d Ns;
-	Eigen::Vector3d Ni;
+	//Eigen::Vector3d Kd;
+	//Eigen::Vector3d Ks;
+	//Eigen::Vector3d Ns;
+	//Eigen::Vector3d Ni;
 };
 
 struct MeshAttributes
@@ -47,6 +47,9 @@ struct MeshAttributes
 	std::vector<Eigen::Vector3d> Barycentric_coordinates;
 	std::vector<TriangleMesh> LightMeshes;
 	std::vector<std::string> MtlName;
+	//std::vector<double> lightmesh_area;
+	//double total_lightmesh_area = 0;
+	//double *area = nullptr;
 	void LoadFile(std::string file_name, Materials* materials, Scene* scene);
 };
 

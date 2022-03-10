@@ -300,6 +300,7 @@ inline Intersection getIntersection(Ray &ray, TriangleMesh *mesh)
 	double tnear = S2.dot(E2) / S1.dot(E1);
 	double u = S1.dot(S) / S1.dot(E1);
 	double v = S2.dot(D) / S1.dot(E1);
+	double det = E1.dot(ray.direction.cross(E2));
 	double EPSILON = 0.0000001;
 	if ((u >= 0) && (v >= 0) && (1 - u - v >= 0) && tnear > EPSILON)
 	{

@@ -7,6 +7,8 @@ struct Ray
 	Eigen::Vector3d origin;
 	Eigen::Vector3d direction, inv_direction;
 	TriangleMesh *mesh;
+	double Ni;
+	bool in_material = 0;
 	Ray(Eigen::Vector3d origin, Eigen::Vector3d direction)
 	{
 		this->origin = origin;
@@ -14,5 +16,7 @@ struct Ray
 		this->direction = this->direction.normalized();
 		this->inv_direction = Eigen::Vector3d(1.0 / direction[0], 1.0 / direction[1], 1.0 / direction[2]);
 		this->mesh = nullptr;
+		this->Ni = -1;
+		this->in_material = 0;
 	}
 };

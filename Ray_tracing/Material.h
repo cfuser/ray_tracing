@@ -4,6 +4,7 @@
 #include "Light.h"
 #include "Scene.h"
 #include <opencv2/opencv.hpp>
+#include <math.h>
 
 struct Material
 {
@@ -13,6 +14,7 @@ struct Material
 	Eigen::Vector3d Ks;
 	std::string map_Ks_name;
 	double Ns;
+	double Ns_radius;
 	double Ni;
 	bool light;
 	Light* light_attr;
@@ -62,7 +64,8 @@ struct Materials
 				ifile >> ch >> temp_material.Ks[0] >> temp_material.Ks[1] >> temp_material.Ks[2];
 				ifile >> ch >> temp_material.Ns;
 				ifile >> ch >> temp_material.Ni;
-
+				temp_material.Ns_radius = std::pow(1 - scene->rate, 1.0 / (temp_material.Ns + 1));
+				temp_material.Ns_radius = 2 * std::sin(std::acos(temp_material.Ns_radius) / 2);
 				for (auto light_iter = scene->lights.begin(); light_iter != scene->lights.end(); light_iter++)
 				{
 					if (temp_material.name == light_iter->name)

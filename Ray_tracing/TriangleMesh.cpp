@@ -2,6 +2,7 @@
 #include "TriangleMesh.h"
 #include "Material.h"
 #include "Scene.h"
+#include "global.h"
 
 Material* getMaterial(std::string mtl_name, Materials* materials)
 {
@@ -106,7 +107,10 @@ void MeshAttributes::LoadFile(std::string file_name, Materials *materials, Scene
 			if (_temp.material == nullptr)
 				system("pause");
 			if (_temp.material->light == true)
+			{
 				LightMeshes.push_back(_temp);
+				//lightmesh_area.push_back(get_area(_temp.v));
+			}
 			TriangleMeshes.push_back(_temp);
 			/*
 			for (auto light : (scene->lights))
