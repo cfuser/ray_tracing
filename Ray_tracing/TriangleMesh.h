@@ -47,9 +47,11 @@ struct MeshAttributes
 	std::vector<Eigen::Vector3d> Barycentric_coordinates;
 	std::vector<TriangleMesh> LightMeshes;
 	std::vector<std::string> MtlName;
+	std::vector<int> MaterialIndex;
 	//std::vector<double> lightmesh_area;
 	//double total_lightmesh_area = 0;
 	//double *area = nullptr;
 	void LoadFile(std::string file_name, Materials* materials, Scene* scene);
 };
 
+Material* getMaterial(std::string mtl_name, Materials* materials);

@@ -29,6 +29,8 @@ void MeshAttributes::LoadFile(std::string file_name, Materials *materials, Scene
 	std::ifstream ifile(file_name);
 	//std::cout << fp << std::endl;
 	//std::cout << file_name.c_str() << std::endl;
+
+	Material *material = nullptr;
 	std::string tag;
 	tag.resize(20);
 	char ch;
@@ -102,7 +104,10 @@ void MeshAttributes::LoadFile(std::string file_name, Materials *materials, Scene
 			}
 			_temp.Barycentric_coordinates = (_temp.v[0] + _temp.v[1] + _temp.v[2]) / 3;
 			_temp.MtlNameIndex = MtlName.size() - 1;
-			_temp.material = getMaterial(MtlName.back(), materials);
+			
+			//_temp.material = getMaterial(MtlName.back(), materials);
+			_temp.material = material;
+
 			_temp.index = TriangleMeshes.size();
 			if (_temp.material == nullptr)
 				system("pause");
@@ -130,6 +135,9 @@ void MeshAttributes::LoadFile(std::string file_name, Materials *materials, Scene
 			name.resize(20);
 			ifile >> name;
 			MtlName.push_back(name);
+			material = getMaterial(MtlName.back(), materials);
+			MaterialIndex.push_back(TriangleMeshes.size());
+			//std::cout << MaterialIndex.size() << std::endl;
 		}
 	}
 }

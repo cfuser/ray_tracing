@@ -1,12 +1,11 @@
-#include "global.h"
+#include "StdAfx.h"
 #include "BVH.h"
 #include "iostream"
 #include <opencv2/opencv.hpp>
 #include "Scene.h"
 #include "Render.h"
 #include <time.h>
-
-//using namespace System::Xml;
+#include "global.h"
 
 inline void UpdateProgress(double progress)
 {
@@ -57,8 +56,8 @@ int main()
 	//std::cout << "path : " << std::endl;
 	//std::cin >> path;
 	double multi_radiance = 1;
-	std::cout << "multi radiance: " << std::endl;
-	std::cin >> multi_radiance;
+	//std::cout << "multi radiance: " << std::endl;
+	//std::cin >> multi_radiance;
 	int spp = 64;
 	std::cout << "input spp: " << std::endl;
 	std::cin >> spp;
@@ -74,15 +73,73 @@ int main()
 	std::cout << "multithread: " << multithread << std::endl;
 
 	int render_choice = -1;
-	std::cout << "render choice:" << std::endl << "0. sample one light mesh" << std::endl << "1. sample solid angle" << std::endl << "2. sample all light mesh" << std::endl;
+	std::cout << "render choice:" << std::endl;
+	std::cout << "0. sample one light mesh" << std::endl;
+	std::cout << "1. sample solid angle" << std::endl;
+	std::cout << "2. sample all light mesh" << std::endl;
+	std::cout << "3. MIS 0 and 1" << std::endl;
+	std::cout << "4. Important Sample" << std::endl;
 	std::cin >> render_choice;
 	//time_t t = time(0);
 	//tm *ltm = localtime(&t);
 	//sprintf(loc_date, "%d%02d%02d", 1900 + ltm->tm_year, 1 + ltm->tm_mon, ltm->tm_mday);
 	//std::cout << "location time: " << loc_date << std::endl;
 
+	std::cout << "P_RR : " << std::endl;
+	std::cin >> P_RR;
+
+	std::cout << "kd distribution : " << std::endl;
+	std::cout << "0. cosine" << std::endl;
+	std::cout << "1. uniform" << std::endl;
+	std::cin >> kd_distribution;
+
+	std::cout << "gamma correction : " << std::endl;
+	std::cin >> gamma_correction_coefficient;
+	
+	std::cout << "control rho_s, 1 for true, 0 for false" << std::endl;
+	std::cin >> control_rho_s;
+
+	std::cout << "sample dir light, 1 for true, 0 for false" << std::endl;
+	std::cin >> sample_dir_light;
+
+	std::cout << "sample all light, 1 for true, 0 for false" << std::endl;
+	std::cin >> sample_all_light;
+
+	std::cout << "sample by group, 1 for true, 0 for false" << std::endl;
+	std::cin >> sample_by_group;
+
+	std::cout << "specular or not, 1 for true, 0 for false" << std::endl;
+	std::cin >> specular_exists;
+
+	std::cout << "specular large coefficient : 1 for true, 0 for false" << std::endl;
+	std::cin >> specular_large_coefficient;
+
+	std::cout << "refraction or not, 1 for true, 0 for false" << std::endl;
+	std::cin >> refraction_or_not;
+
+	std::cout << "_SAH, 1 for true, 0 for false" << std::endl;
+	std::cin >> _SAH;
+
 	std::cout << "scene rate(default, 0.9, 1 - rate): " << std::endl;
 	std::cin >> scene.rate;
+
+	MIS_alpha = -2;
+	std::cout << "MIS_alpha: " << std::endl;
+	std::cin >> MIS_alpha;
+
+	specular_coefficient = 0;
+	std::cout << "specular coefficient: " << std::endl;
+	std::cin >> specular_coefficient;
+
+	shading_depth = -1;
+	std::cout << "shading depth" << std::endl;
+	std::cin >> shading_depth;
+
+	std::cout << "one light pdf choice, 1 for multiply, 0 for total area" << std::endl;
+	std::cin >> one_light_pdf_choice;
+
+	std::cout << "group light pdf choice, 1 for multiply, 0 for group area" << std::endl;
+	std::cin >> group_light_pdf_choice;
 
 	{
 		time_t t = time(0);
@@ -151,6 +208,37 @@ int main()
 		scene.total_lightmesh_area += area;
 		scene.lightmesh_area.push_back(scene.total_lightmesh_area);
 	}
+
+	//if (false)
+	for (int i = 0; i < mesh_attributes.MtlName.size(); i++)
+	{
+		Material *material = getMaterial(mesh_attributes.MtlName[i], &materials);
+		if (material->light == true)
+		{
+			int left = mesh_attributes.MaterialIndex[i], right = -1;
+			if (i != mesh_attributes.MtlName.size() - 1)
+				right = mesh_attributes.MaterialIndex[i + 1];
+			else
+				right = mesh_attributes.TriangleMeshes.size();
+			if (scene.LightIndex.empty())
+			{
+				right = right - left;
+				left = 0;
+			}
+			else
+			{
+				int end = scene.LightIndex.back().second;
+				right = right - (left - end);
+				left = end;
+			}
+			scene.LightIndex.push_back(std::pair<int, int>(left, right));
+		}
+	}
+	//if (false)
+	for (int i = 0; i < scene.LightIndex.size(); i++)
+	{
+		std::cout << "left : " << scene.LightIndex[i].first << ", right : " << scene.LightIndex[i].second << std::endl;
+	}
 	double scale = std::tan(scene.fovy_value * 0.5 / 180 * M_PI);
 	//std::cout << std::tan(45 / 180.0 * M_PI) << std::endl;
 
@@ -200,7 +288,7 @@ int main()
 					//std::cout << i << " " << j << " " << std::endl;
 					//std::cout << "beform gamma correction: " << std::endl;
 					//std::cout << res_color[0] << " " << res_color[1] << " " << res_color[2] << std::endl;
-					res_color = Eigen::Vector3d(std::pow(res_color[0], 1 / 2.2), std::pow(res_color[1], 1 / 2.2), std::pow(res_color[2], 1 /2.2)); 
+					res_color = Eigen::Vector3d(std::pow(res_color[0], 1 / gamma_correction_coefficient), std::pow(res_color[1], 1 / gamma_correction_coefficient), std::pow(res_color[2], 1 / gamma_correction_coefficient));
 					res_color *= 255 * multi_radiance;
 					//std::cout << "after gamma correction: " << std::endl;
 					//std::cout << res_color[0] << " " << res_color[1] << " " << res_color[2] << std::endl;
@@ -242,6 +330,7 @@ int main()
 
 			for (int k = 0; k < spp; k++)
 			{
+				//std::cout << "k = " << k << std::endl;
 				//std::cout << "k : " << k << std::endl;
 				//if (i == 6 && j == 7 && k == 7)
 				//{
@@ -270,7 +359,7 @@ int main()
 			}
 			//res_color.pow(2.2);
 			//Eigen::pow(res_color, );
-			res_color = Eigen::Vector3d(std::pow(res_color[0], 1 / 2.2), std::pow(res_color[1], 1 / 2.2), std::pow(res_color[2], 1 / 2.2));
+			res_color = Eigen::Vector3d(std::pow(res_color[0], 1 / gamma_correction_coefficient), std::pow(res_color[1], 1 / gamma_correction_coefficient), std::pow(res_color[2], 1 / gamma_correction_coefficient));
 			res_color *= 255 * multi_radiance;
 			//std::cout << res_color << std::endl;
 			//system("pause");
