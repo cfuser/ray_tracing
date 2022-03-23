@@ -358,7 +358,8 @@ Eigen::Vector3d shade_4(Ray r_out, int depth, BVH *bvh_root, std::vector<Triangl
 		rho_s = std::max(rho_s, rho_s_vec[_]);
 	}
 
-	f_r_correction(rho_d_vec, rho_s_vec);
+	if (control_rho_s == 0)
+		f_r_correction(rho_d_vec, rho_s_vec);
 
 	Eigen::Vector3d rho_s_vec_contribution = rho_s_vec;
 	for (int _ = 0; _ < 3; _++)
@@ -531,43 +532,46 @@ Eigen::Vector3d shade_4(Ray r_out, int depth, BVH *bvh_root, std::vector<Triangl
 			//L_dir += p.mesh->material->Kd.cwiseProduct(light_mesh.material->light_attr->Radiance);
 			//L_dir += p.mesh->material->Kd * light_mesh.material->light_attr.Radiance / M_PI * f_r * cos_theta_p * cos_theta_x / distance / light_pdf;
 
-			Eigen::Vector3d n = intersection.normal;
-			Eigen::Vector3d r = 2 * (-r_out.direction.dot(n)) * n - -r_out.direction;
-			r = r.normalized();
-			double cos_alpha = r.dot(r_in.direction);
-			
-			// cos_alpha = 1;
-			
-			//L_dir += light_mesh.material->light_attr->Radiance.cwiseProduct(f_r) * 
-			//L_dir += p.mesh->material->Ks * light_mesh.material->light_attr.Radiance / M_PI * std::pow(std::max(0.0, n.dot(h)), p.mesh->material->Ns) / distance / light_pdf;
-			Eigen::Vector3d res_;// = Eigen::Vector3d::Ones();
-			res_ = f_r_Ks * (intersection.mesh->material->Ns + 2) / (intersection.mesh->material->Ns + 1) * cos_theta_p;
+			if (intersection.mesh->material->Ns != 1)
+			{
+				Eigen::Vector3d n = intersection.normal;
+				Eigen::Vector3d r = 2 * (-r_out.direction.dot(n)) * n - -r_out.direction;
+				r = r.normalized();
+				double cos_alpha = r.dot(r_in.direction);
 
-			//if (specular_large_coefficient == 1)
-			//	res_ = res_ * (intersection.mesh->material->Ns + 1) / 2.0 / M_PI;
-			//res_ = res_ * fast_power(cos_alpha, intersection.mesh->material->Ns) * (intersection.mesh->material->Ns + 2) / (intersection.mesh->material->Ns + 1) * cos_theta_p;
-			//res_ = res_.cwiseProduct(f_r_Ks) / P_RR;
+				// cos_alpha = 1;
 
-			if (specular_large_coefficient == 1)
-				res_ = res_ * (intersection.mesh->material->Ns + 1) / 2.0 / M_PI * fast_power(cos_alpha, intersection.mesh->material->Ns);
-			res_ = res_.cwiseProduct(light_mesh.material->light_attr->Radiance) * cos_theta_x / std::pow(distance, distance_coefficient) / light_pdf;
-			
-			Eigen::Vector3d rho_s_vec_inv = rho_s_vec.cwiseInverse();
-			//shading_res = shading_res / rho_s_vec[color_type];
+				//L_dir += light_mesh.material->light_attr->Radiance.cwiseProduct(f_r) * 
+				//L_dir += p.mesh->material->Ks * light_mesh.material->light_attr.Radiance / M_PI * std::pow(std::max(0.0, n.dot(h)), p.mesh->material->Ns) / distance / light_pdf;
+				Eigen::Vector3d res_;// = Eigen::Vector3d::Ones();
+				res_ = f_r_Ks * (intersection.mesh->material->Ns + 2) / (intersection.mesh->material->Ns + 1) * cos_theta_p;
 
-			// to calculate '/ rho_s'
-			//res_ = res_.cwiseProduct(rho_s_vec_inv);
+				//if (specular_large_coefficient == 1)
+				//	res_ = res_ * (intersection.mesh->material->Ns + 1) / 2.0 / M_PI;
+				//res_ = res_ * fast_power(cos_alpha, intersection.mesh->material->Ns) * (intersection.mesh->material->Ns + 2) / (intersection.mesh->material->Ns + 1) * cos_theta_p;
+				//res_ = res_.cwiseProduct(f_r_Ks) / P_RR;
 
-			//shading_res = shading_res.cwiseProduct(rho_s_vec);
-			//res_ = res_.cwiseProduct(rho_s_vec_contribution);
+				if (specular_large_coefficient == 1)
+					res_ = res_ * (intersection.mesh->material->Ns + 1) / 2.0 / M_PI * fast_power(cos_alpha, intersection.mesh->material->Ns);
+				res_ = res_.cwiseProduct(light_mesh.material->light_attr->Radiance) * cos_theta_x / std::pow(distance, distance_coefficient) / light_pdf;
 
-			//res_ = light_mesh.material->light_attr->Radiance.cwiseProduct(rho_s_vec_contribution) * fast_power(std::max(0.0, cos_alpha), intersection.mesh->material->Ns) / light_pdf * cos_theta_p;
-			//res_ = get_Radiance_1(light_mesh.material->light_attr->Radiance, f_r_Ks, cos_alpha, intersection.mesh->material->Ns, light_pdf, cos_theta_p);
-			//f_r_Ks = intersection.mesh->material->Ks;
-			res_ = f_r_Ks.cwiseProduct(light_mesh.material->light_attr->Radiance) * fast_power(std::max(0.0, cos_alpha), intersection.mesh->material->Ns) / light_pdf * (intersection.mesh->material->Ns + 2) / 2.0 / M_PI * cos_theta_p * cos_theta_x / std::pow(distance, distance_coefficient);
-			if (control_rho_s)
-				res_ = res_.cwiseProduct(rho_s_vec_inv).cwiseProduct(rho_s_vec_contribution);
-			Sample_Light += res_;
+				Eigen::Vector3d rho_s_vec_inv = rho_s_vec.cwiseInverse();
+				//shading_res = shading_res / rho_s_vec[color_type];
+
+				// to calculate '/ rho_s'
+				//res_ = res_.cwiseProduct(rho_s_vec_inv);
+
+				//shading_res = shading_res.cwiseProduct(rho_s_vec);
+				//res_ = res_.cwiseProduct(rho_s_vec_contribution);
+
+				//res_ = light_mesh.material->light_attr->Radiance.cwiseProduct(rho_s_vec_contribution) * fast_power(std::max(0.0, cos_alpha), intersection.mesh->material->Ns) / light_pdf * cos_theta_p;
+				//res_ = get_Radiance_1(light_mesh.material->light_attr->Radiance, f_r_Ks, cos_alpha, intersection.mesh->material->Ns, light_pdf, cos_theta_p);
+				//f_r_Ks = intersection.mesh->material->Ks;
+				res_ = f_r_Ks.cwiseProduct(light_mesh.material->light_attr->Radiance) * fast_power(std::max(0.0, cos_alpha), intersection.mesh->material->Ns) / light_pdf * (intersection.mesh->material->Ns + 2) / 2.0 / M_PI * cos_theta_p * cos_theta_x / std::pow(distance, distance_coefficient);
+				if (control_rho_s)
+					res_ = res_.cwiseProduct(rho_s_vec_inv).cwiseProduct(rho_s_vec_contribution);
+				Sample_Light += res_;
+			}
 		}
 	}
 	
