@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Material.h"
 void Materials::LoadFile(std::string file_name, Scene* scene, std::string path)
 {

@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Scene.h"
 void line_(std::string line, std::string &name, std::vector<double> &attr)
 {

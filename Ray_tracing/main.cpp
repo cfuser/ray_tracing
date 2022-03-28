@@ -44,6 +44,17 @@ int main()
 	{
 		path = "D:/subject/graduate/computer graphics/example-scenes-cg21/" + global_name + "/";
 	}
+	
+	int input_manually = -1;
+	std::cout << "input file manually, 1 for true, 0 for false" << std::endl;
+	std::cin >> input_manually;
+
+	if (input_manually == 1)
+	{
+		std::cout << "input path" << std::endl;
+		std::cin >> path;
+	}
+
 	std::cout << path << std::endl;
 
 	Scene scene;
@@ -96,8 +107,14 @@ int main()
 	std::cout << "gamma correction : " << std::endl;
 	std::cin >> gamma_correction_coefficient;
 	
-	std::cout << "control rho_s, 1 for true, 0 for false" << std::endl;
+	std::cout << "control_rho_s, 1 for true, 0 for false" << std::endl;
 	std::cin >> control_rho_s;
+
+	std::cout << "control_K, 1 for true, 0 for false" << std::endl;
+	std::cin >> control_K;
+
+	std::cout << "normalize_rho_s, 1 for true, 0 for false" << std::endl;
+	std::cin >> normalize_rho_s;
 
 	std::cout << "sample dir light, 1 for true, 0 for false" << std::endl;
 	std::cin >> sample_dir_light;
@@ -120,6 +137,9 @@ int main()
 	std::cout << "_SAH, 1 for true, 0 for false" << std::endl;
 	std::cin >> _SAH;
 
+	std::cout << "sphere_correction, 1 for true, 0 for false" << std::endl;
+	std::cin >> sphere_correction;
+
 	std::cout << "scene rate(default, 0.9, 1 - rate): " << std::endl;
 	std::cin >> scene.rate;
 
@@ -140,6 +160,52 @@ int main()
 
 	std::cout << "group light pdf choice, 1 for multiply, 0 for group area" << std::endl;
 	std::cin >> group_light_pdf_choice;
+
+	std::cout << "MIS_Method, 1 for true, 0 for false" << std::endl;
+	std::cin >> MIS_Method;
+
+	std::cout << "MIS_BRDF, 1 for true, 0 for false" << std::endl;
+	std::cin >> MIS_BRDF;
+
+	std::cout << "MIS_Diffuse, 1 for true, 0 for false" << std::endl;
+	std::cin >> MIS_Diffuse;
+
+	std::cout << "MIS_sample_area, 1 for true, 0 for false" << std::endl;
+	std::cin >> MIS_sample_area;
+
+	std::cout << "MIS_correction_coefficient, 2 for power, 1 for linear" << std::endl;
+	std::cin >> MIS_correction_coefficient;
+
+	std::cout << "MIS_unhit_sample, 1 for true, 0 for false" << std::endl;
+	std::cin >> MIS_unhit_sample;
+
+	std::cout << "MIS_triangle_unhit_sample, 1 for true, 0 for false" << std::endl;
+	std::cin >> MIS_triangle_unhit_sample;
+
+	std::cout << "MIS_specular_unhit_sample, 1 for true, 0 for false" << std::endl;
+	std::cin >> MIS_specular_unhit_sample;
+
+	std::cout << "specular_unhit_continue, 1 for true, 0 for false" << std::endl;
+	std::cin >> specular_unhit_continue;
+
+	std::cout << "MIS_diffuse_unhit_sample, 1 for true, 0 for false" << std::endl;
+	std::cin >> MIS_diffuse_unhit_sample;
+
+	std::cout << "diffuse_unhit_continue, 1 for true, 0 for false" << std::endl;
+	std::cin >> diffuse_unhit_continue;
+
+	divide_coefficient = 0;
+	std::cout << "divide_coefficient" << std::endl;
+	std::cin >> divide_coefficient;
+
+	std::cout << "I_think_correct, 1 for true, 0 for false" << std::endl;
+	std::cin >> I_think_correct;
+
+	std::cout << "I_think_correct_further, 1 for true, 0 for false" << std::endl;
+	std::cin >> I_think_correct_further;
+
+	std::cout << "_paper, 1 for true, 0 for false" << std::endl;
+	std::cin >> _paper;
 
 	{
 		time_t t = time(0);
@@ -323,7 +389,7 @@ int main()
 	if (multithread == false)
 	for (int i = 0; i < scene.width_value; i++)
 	{
-		for (int j = 0; j < scene.height_value; j++)
+		for (int j = scene.height_value / 3; j < scene.height_value; j++)
 		{
 			//std::cout << i << " " << j << std::endl;
 			Eigen::Vector3d res_color = Eigen::Vector3d::Zero();
@@ -367,6 +433,8 @@ int main()
 			res_color[1] = res_color[1] > 255 ? 255 : res_color[1];
 			res_color[2] = res_color[2] > 255 ? 255 : res_color[2];
 
+			//std::cout << res_color << std::endl;
+			//system("pause");
 			res.at<cv::Vec3b>(scene.height_value - j - 1, i) = cv::Vec3b(res_color[2], res_color[1], res_color[0]);
 		}
 		UpdateProgress(1.0 * i / scene.width_value);

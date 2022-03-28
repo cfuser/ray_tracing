@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Bounding_Box.h"
 
 

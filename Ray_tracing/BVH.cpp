@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "BVH.h"
 #include "global.h"
 

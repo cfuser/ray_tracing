@@ -5,11 +5,12 @@
 
 struct Bounding_Box
 {
+	// bounding_box_axis
 	double x_min = DBL_MAX, x_max = -DBL_MAX;
 	double y_min = DBL_MAX, y_max = -DBL_MAX;
 	double z_min = DBL_MAX, z_max = -DBL_MAX;
 	double surface_area = 0;
-	Bounding_Box(std::vector<TriangleMesh> *meshes)
+	Bounding_Box(std::vector<TriangleMesh> *meshes) // initialize
 	{
 		for (TriangleMesh mesh : (*meshes))
 		{
@@ -25,7 +26,7 @@ struct Bounding_Box
 		}
 		this->surface_area = (x_max - x_min) * (y_max - y_min) + (y_max - y_min) * (z_max - z_min) + (z_max - z_min) * (x_max - x_min);
 	}
-	Bounding_Box(TriangleMesh mesh)
+	Bounding_Box(TriangleMesh mesh) // initialize
 	{
 		for (int i = 0; i < 3; i++)
 		{
@@ -42,16 +43,16 @@ struct Bounding_Box
 	{
 	}
 
-	Bounding_Box Union(Bounding_Box add);
+	Bounding_Box Union(Bounding_Box add); // union bounding boxes
 	
 
-	double get_surface_area();
+	double get_surface_area(); // get surface area of bounding box
 
-	bool IntersectP(Ray &ray, Eigen::Vector3d invDir, std::array<int, 3>& dirIsNeg);
+	bool IntersectP(Ray &ray, Eigen::Vector3d invDir, std::array<int, 3>& dirIsNeg); // test intersection of ray and triangle mesh
 
-	void Print();
+	void Print(); // print bounding box
 };
 
-extern "C" _declspec(dllexport) Bounding_Box Union(Bounding_Box ori, Bounding_Box add);
-extern "C" _declspec(dllexport) double get_surface_area(Bounding_Box bbox);
-extern "C" _declspec(dllexport) bool IntersectP(Bounding_Box &bbox, Ray &ray, Eigen::Vector3d invDir, std::array<int, 3>& dirIsNeg);
+extern "C" _declspec(dllexport) Bounding_Box Union(Bounding_Box ori, Bounding_Box add); // union bounding boxs
+extern "C" _declspec(dllexport) double get_surface_area(Bounding_Box bbox); // get surface area of bounding box
+extern "C" _declspec(dllexport) bool IntersectP(Bounding_Box &bbox, Ray &ray, Eigen::Vector3d invDir, std::array<int, 3>& dirIsNeg); // test intersection of ray and triangle mesh

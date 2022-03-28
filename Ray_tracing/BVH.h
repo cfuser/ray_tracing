@@ -55,10 +55,10 @@ extern "C" _declspec(dllexport) void divide_mid(std::vector<TriangleMesh> *meshe
 
 struct BVH
 {
-	int termination_criteria = 5;
-	Bounding_Box bbox;
-	BVH* child[2] = { nullptr, nullptr };
-	std::vector<TriangleMesh> Object;
+	int termination_criteria = 5; // maximum number of object in one leaf node
+	Bounding_Box bbox; // bounding box
+	BVH* child[2] = { nullptr, nullptr }; // point to child
+	std::vector<TriangleMesh> Object; // object in leaf node
 	
 	/*
 	BVH(std::vector<TriangleMesh> *meshes)

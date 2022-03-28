@@ -8,21 +8,21 @@ extern "C" _declspec(dllexport) void line_(std::string line, std::string &name, 
 
 struct Scene
 {
-	Eigen::Vector3d eye_value;
+	Eigen::Vector3d eye_value; // camera and scene defintion
 	Eigen::Vector3d lookat_value;
 	Eigen::Vector3d up_value;
 	double fovy_value;
 	int width_value;
 	int height_value;
-	std::vector<Light> lights;
+	std::vector<Light> lights; // light list
 	Eigen::Vector3d x_;
 	Eigen::Vector3d y_;
 	Eigen::Vector3d z_;
-	std::vector<double> lightmesh_area;
+	std::vector<double> lightmesh_area; // area of light mesh
 	double total_lightmesh_area = 0;
 	double rate;
-	std::vector<std::pair<int, int>> LightIndex;
-	Scene()
+	std::vector<std::pair<int, int>> LightIndex; // first and last index of light in triangle mesh
+	Scene() // initialize
 	{
 		//eye_value = Eigen::Vector3d(0, 1, 6.8);
 		//lookat_value = Eigen::Vector3d(0, 1, 5.8);
@@ -56,7 +56,7 @@ struct Scene
 		//y_ = up_value;
 		//x_ = -y_.cross(z_);
 	}
-	void LoadFile(std::string name)
+	void LoadFile(std::string name) // load file
 	{
 		std::vector<std::string> type_name;
 		std::vector<std::vector<double>> type_attr;

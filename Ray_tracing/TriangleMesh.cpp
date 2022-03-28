@@ -1,4 +1,4 @@
-#include <bits/stdc++.h>
+#include "stdafx.h"
 #include "TriangleMesh.h"
 #include "Material.h"
 #include "Scene.h"

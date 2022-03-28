@@ -4,12 +4,12 @@
 
 struct Ray
 {
-	Eigen::Vector3d origin;
-	Eigen::Vector3d direction, inv_direction;
-	TriangleMesh *mesh;
-	double Ni;
-	bool in_material = 0;
-	Ray(Eigen::Vector3d origin, Eigen::Vector3d direction)
+	Eigen::Vector3d origin; // ray position
+	Eigen::Vector3d direction, inv_direction; // ray direction
+	TriangleMesh *mesh; // mesh
+	double Ni; // Ni
+	bool in_material = 0; // in Ni_material or not, 1 for true, 0 for false
+	Ray(Eigen::Vector3d origin, Eigen::Vector3d direction) //initialize
 	{
 		this->origin = origin;
 		this->direction = direction;
